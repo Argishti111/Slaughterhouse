@@ -1,0 +1,25 @@
+{
+  "name": "Slaughterhouse",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Argishti111/Slaughterhouse.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Argishti111/Slaughterhouse/issues"
+  },
+  "homepage": "https://github.com/Argishti111/Slaughterhouse#readme",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "pg": "^8.0.2"
+  }
+}
