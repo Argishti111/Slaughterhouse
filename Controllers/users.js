@@ -1,22 +1,15 @@
 const express = require('express')
 const router = express()
-const {Pool} = require('pg')
-require('dotenv').config()
-
-
-
-let connectionString = process.env.postgresconnect
-
-const pool = new Pool({
-    connectionString,
-    ssl: true
-})
+const conn = require('./connectionManager.js')
+const auth = require('./auth.js')
 
 router.use(express.json())
 
-router.get('/', (req, res) => {
-        pool.connect((err, client, done) => {
-        if(err) {
+
+
+router.get('/',auth.checkToken,  (req, res) => {
+    conn.pool().connect((err, client, done) => {
+        if (err) {
             res.send(err)
         }
         client.query('Select * from "Argisht"."users"')
@@ -35,29 +28,30 @@ router.get('/', (req, res) => {
     })
 })
 
-router.post('/', (req, res) => {
-    pool.connect((err, client, done) => {
-        if(err) {
-            res.send(err)
-        }
-        client.query('insert into "Argisht"."users" values(default, $1)',[req.body.name])
-            .then(result => {
-                return result.rows
-            })
-            .then(data => {
-                res.status(200).send("success")
-            })
-            .catch(err => {
-                res.status(500).send(err)
-            })
-            .finally(() => {
-                done()
-            })
-    })
-})
+// router.post('/', (req, res) => {
+//
+//     pool.connect((err, client, done) => {
+//         if(err) {
+//             res.send(err)
+//         }
+//         client.query('insert into "Argisht"."users" values(default, $1, $2)',[req.body.name,req.body.password])
+//             .then(result => {
+//                 return result.rows
+//             })
+//             .then(data => {
+//                 res.status(200).send("success")
+//             })
+//             .catch(err => {
+//                 res.status(500).send(err)
+//             })
+//             .finally(() => {
+//                 done()
+//             })
+//     })
+// })
 
-router.delete('/:id', (req, res) => {
-    pool.connect((err, client, done) => {
+router.delete('/:id',auth.checkToken, (req, res) => {
+    conn.pool().connect((err, client, done) => {
         if(err) {
             res.send(err)
         }

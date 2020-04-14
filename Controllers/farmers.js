@@ -1,21 +1,13 @@
 const express = require('express')
 const router = express()
-const {Pool} = require('pg')
-require('dotenv').config()
+const auth = require('./auth.js')
+const conn = require('./connectionManager.js')
 
-
-
-let connectionString = process.env.postgresconnect
-
-const pool = new Pool({
-    connectionString,
-    ssl: true
-})
 
 router.use(express.json())
 
-router.get('/', (req, res) => {
-    pool.connect((err, client, done) => {
+router.get('/',auth.checkToken, (req, res) => {
+    conn.pool().connect((err, client, done) => {
         if(err) {
             res.send(err)
         }
@@ -35,8 +27,8 @@ router.get('/', (req, res) => {
     })
 })
 
-router.post('/', (req, res) => {
-    pool.connect((err, client, done) => {
+router.post('/',auth.checkToken, (req, res) => {
+    conn.pool().connect((err, client, done) => {
         if(err) {
             res.send(err)
         }
@@ -56,8 +48,8 @@ router.post('/', (req, res) => {
     })
 })
 
-router.delete('/:id', (req, res) => {
-    pool.connect((err, client, done) => {
+router.delete('/:id',auth.checkToken, (req, res) => {
+    conn.pool().connect((err, client, done) => {
         if(err) {
             res.send(err)
         }
