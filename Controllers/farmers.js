@@ -1,72 +1,48 @@
 const express = require('express')
 const router = express()
 const auth = require('./auth.js')
-const conn = require('./connectionManager.js')
+const Farmer = require('../Model/farmersModel.js')
 
 
 router.use(express.json())
 
 router.get('/',auth.checkToken, (req, res) => {
-    conn.pool().connect((err, client, done) => {
-        if(err) {
+    Farmer.findAll({raw: true})
+        .then(data => {
+            res.send(data)
+        })
+        .catch(err => {
             res.send(err)
-        }
-        client.query('Select * from "Argisht"."farmers"')
-            .then(result => {
-                return result.rows
-            })
-            .then(data => {
-                res.status(200).send(data)
-            })
-            .catch(err => {
-                res.status(500).send(err)
-            })
-            .finally(() => {
-                done()
-            })
+        })
     })
-})
 
 router.post('/',auth.checkToken, (req, res) => {
-    conn.pool().connect((err, client, done) => {
-        if(err) {
-            res.send(err)
-        }
-        client.query('insert into "Argisht"."farmers" values(default, $1)',[req.body.name])
-            .then(result => {
-                return result.rows
-            })
-            .then(data => {
-                res.status(200).send("success")
-            })
-            .catch(err => {
-                res.status(500).send(err)
-            })
-            .finally(() => {
-                done()
-            })
+    Farmer.create({
+        name: req.body.name
+    },{
+        fields: ["name"]
     })
+        .then(data => {
+            res.send("success")
+        })
+        .catch(err => {
+            res.send(err)
+        })
+
 })
 
 router.delete('/:id',auth.checkToken, (req, res) => {
-    conn.pool().connect((err, client, done) => {
-        if(err) {
-            res.send(err)
+    Farmer.destroy({
+        where:{
+            id: req.params.id
         }
-        client.query('delete from "Argisht"."farmers" where id = ' + req.params.id)
-            .then(result => {
-                return result.rows
-            })
-            .then(data => {
-                res.status(200).send("success")
-            })
-            .catch(err => {
-                res.status(500).send(err)
-            })
-            .finally(() => {
-                done()
-            })
     })
+        .then(data => {
+            res.send('success')
+        })
+        .catch(err => {
+            res.send(err)
+        })
 })
 
 module.exports = router

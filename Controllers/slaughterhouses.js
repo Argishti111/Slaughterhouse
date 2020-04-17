@@ -1,72 +1,47 @@
 const express = require('express')
 const router = express()
 const auth = require('./auth.js')
-const conn = require('./connectionManager.js')
+const Slaughterhouse = require('../Model/slaughterhousesModel.js')
 
 
 router.use(express.json())
 
 router.get('/',auth.checkToken, (req, res) => {
-    conn.pool().connect((err, client, done) => {
-        if(err) {
+    Slaughterhouse.findAll({raw: true})
+        .then(data => {
+            res.send(data)
+        })
+        .catch(err => {
             res.send(err)
-        }
-        client.query('Select * from "Argisht"."slaughterhouses"')
-            .then(result => {
-                return result.rows
-            })
-            .then(data => {
-                res.status(200).send(data)
-            })
-            .catch(err => {
-                res.status(500).send(err)
-            })
-            .finally(() => {
-                done()
-            })
-    })
+        })
 })
 
 router.post('/',auth.checkToken, (req, res) => {
-    conn.pool().connect((err, client, done) => {
-        if(err) {
-            res.send(err)
-        }
-        client.query('insert into "Argisht"."slaughterhouses" values(default, $1)',[req.body.name])
-            .then(result => {
-                return result.rows
-            })
-            .then(data => {
-                res.status(200).send("success")
-            })
-            .catch(err => {
-                res.status(500).send(err)
-            })
-            .finally(() => {
-                done()
-            })
+    Slaughterhouse.create({
+        name: req.body.name
+    },{
+        fields: ["name"]
     })
+        .then(data => {
+            res.send("success")
+        })
+        .catch(err => {
+            res.send(err)
+        })
 })
 
 router.delete('/:id',auth.checkToken, (req, res) => {
-    conn.pool().connect((err, client, done) => {
-        if(err) {
-            res.send(err)
+    Slaughterhouse.destroy({
+        where:{
+            id: req.params.id
         }
-        client.query('delete from "Argisht"."slaughterhouses" where id = ' + req.params.id)
-            .then(result => {
-                return result.rows
-            })
-            .then(data => {
-                res.status(200).send("success")
-            })
-            .catch(err => {
-                res.status(500).send(err)
-            })
-            .finally(() => {
-                done()
-            })
     })
+        .then(data => {
+            res.send('success')
+        })
+        .catch(err => {
+            res.send(err)
+        })
 })
 
 module.exports = router
